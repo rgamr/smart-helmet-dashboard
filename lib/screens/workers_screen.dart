@@ -11,45 +11,83 @@ class WorkersScreen extends StatefulWidget {
 
 class _WorkersScreenState extends State<WorkersScreen> {
   String selectedFilter = 'All';
+  String searchQuery = '';
 
-  // Sample worker data (replace with backend later)
+  // Sample worker data
   List<Worker> workers = [
-    Worker(name: 'Ahmed Raafat', id: 'W-102', status: 'Online', helmet: 'Connected', lastSeen: '2 min ago'),
-    Worker(name: 'Raghad Amr', id: 'W-117', status: 'Online', helmet: 'Connected', lastSeen: 'Just now'),
-    Worker(name: 'Ahmed Eslam', id: 'W-121', status: 'Offline', helmet: 'Disconnected', lastSeen: '1 hr ago'),
-    Worker(name: 'Hesham Abaza', id: 'W-135', status: 'Incident', helmet: 'Disconnected', lastSeen: '10 min ago'),
+    Worker(
+        name: 'Ahmed Raafat',
+        id: 'W-102',
+        status: 'Online',
+        helmet: 'Connected',
+        lastSeen: '2 min ago'),
+    Worker(
+        name: 'Raghad Amr',
+        id: 'W-117',
+        status: 'Online',
+        helmet: 'Connected',
+        lastSeen: 'Just now'),
+    Worker(
+        name: 'Ahmed Eslam',
+        id: 'W-121',
+        status: 'Offline',
+        helmet: 'Disconnected',
+        lastSeen: '1 hr ago'),
+    Worker(
+        name: 'Hesham Abaza',
+        id: 'W-135',
+        status: 'Incident',
+        helmet: 'Disconnected',
+        lastSeen: '10 min ago'),
   ];
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final screenWidth = MediaQuery.of(context).size.width;
 
-    // Filter workers based on selected status
-    final filteredWorkers = selectedFilter == 'All'
-        ? workers
-        : workers.where((w) => w.status == selectedFilter).toList();
+    // Responsive settings
+    double padding = screenWidth < 600 ? 16 : 24;
+    double avatarRadius = screenWidth < 500 ? 24 : 26;
+    double titleFont = screenWidth < 500 ? 20 : 24;
+    double subTitleFont = screenWidth < 500 ? 14 : 16;
+    double statusFont = screenWidth < 500 ? 10 : 12;
+
+    // Filtered and searched workers
+    final filteredWorkers = workers.where((w) {
+      final matchesStatus = selectedFilter == 'All' || w.status == selectedFilter;
+      final matchesSearch = searchQuery.isEmpty ||
+          w.name.toLowerCase().contains(searchQuery.toLowerCase()) ||
+          w.id.toLowerCase().contains(searchQuery.toLowerCase());
+      return matchesStatus && matchesSearch;
+    }).toList();
 
     return Scaffold(
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(padding),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               // Header
               Text(
                 'Workers',
-                style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+                style: theme.textTheme.headlineMedium
+                    ?.copyWith(fontWeight: FontWeight.bold, fontSize: titleFont),
               ),
               const SizedBox(height: 4),
               Text(
                 '${workers.length} total • ${workers.where((w) => w.status == 'Online').length} online',
-                style: theme.textTheme.bodyMedium?.copyWith(color: Colors.grey),
+                style: theme.textTheme.bodyMedium
+                    ?.copyWith(color: Colors.grey, fontSize: subTitleFont),
               ),
               const SizedBox(height: 16),
 
-              // Search (optional, logic can be implemented later)
+              // Search Field with validation
               TextField(
+                onChanged: (value) {
+                  setState(() => searchQuery = value);
+                },
                 decoration: InputDecoration(
                   hintText: 'Search worker...',
                   prefixIcon: const Icon(Icons.search),
@@ -59,6 +97,12 @@ class _WorkersScreenState extends State<WorkersScreen> {
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide.none,
                   ),
+                  suffixIcon: searchQuery.isNotEmpty
+                      ? IconButton(
+                    icon: const Icon(Icons.clear),
+                    onPressed: () => setState(() => searchQuery = ''),
+                  )
+                      : null,
                 ),
               ),
               const SizedBox(height: 16),
@@ -80,12 +124,26 @@ class _WorkersScreenState extends State<WorkersScreen> {
 
               // Worker list
               Expanded(
-                child: ListView.separated(
+                child: filteredWorkers.isEmpty
+                    ? Center(
+                  child: Text(
+                    'No workers found',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                        color: Colors.grey, fontSize: subTitleFont),
+                  ),
+                )
+                    : ListView.separated(
                   itemCount: filteredWorkers.length,
                   separatorBuilder: (_, __) => const SizedBox(height: 12),
                   itemBuilder: (context, index) {
                     final worker = filteredWorkers[index];
-                    return WorkerCard(worker: worker);
+                    return WorkerCard(
+                      worker: worker,
+                      avatarRadius: avatarRadius,
+                      titleFont: subTitleFont + 2,
+                      subTitleFont: subTitleFont,
+                      statusFont: statusFont,
+                    );
                   },
                 ),
               ),
@@ -100,8 +158,19 @@ class _WorkersScreenState extends State<WorkersScreen> {
 // ================= WorkerCard =================
 class WorkerCard extends StatelessWidget {
   final Worker worker;
+  final double avatarRadius;
+  final double titleFont;
+  final double subTitleFont;
+  final double statusFont;
 
-  const WorkerCard({required this.worker});
+  const WorkerCard({
+    super.key,
+    required this.worker,
+    required this.avatarRadius,
+    required this.titleFont,
+    required this.subTitleFont,
+    required this.statusFont,
+  });
 
   Color _statusColor(String status) {
     switch (status) {
@@ -128,18 +197,17 @@ class WorkerCard extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(14),
         onTap: () {
-          // Navigate to worker details
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => WorkerDetailsScreen(worker: worker)),
           );
         },
         child: Padding(
-          padding: const EdgeInsets.all(14),
+          padding: EdgeInsets.all(avatarRadius / 1.5),
           child: Row(
             children: [
               CircleAvatar(
-                radius: 26,
+                radius: avatarRadius,
                 backgroundColor: _statusColor(worker.status).withOpacity(0.15),
                 child: Icon(Icons.person, color: _statusColor(worker.status)),
               ),
@@ -148,20 +216,32 @@ class WorkerCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(worker.name, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
-                    Text(worker.id, style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey)),
+                    Text(worker.name,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600, fontSize: titleFont)),
+                    Text(worker.id,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                            color: Colors.grey, fontSize: subTitleFont)),
                     const SizedBox(height: 6),
                     Row(
                       children: [
-                        StatusBadge(label: worker.status, color: _statusColor(worker.status)),
+                        StatusBadge(
+                            label: worker.status,
+                            color: _statusColor(worker.status),
+                            fontSize: statusFont),
                         const SizedBox(width: 6),
-                        StatusBadge(label: 'Helmet ${worker.helmet}', color: _helmetColor(worker.helmet)),
+                        StatusBadge(
+                            label: 'Helmet ${worker.helmet}',
+                            color: _helmetColor(worker.helmet),
+                            fontSize: statusFont),
                       ],
                     ),
                   ],
                 ),
               ),
-              Text(worker.lastSeen, style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey)),
+              Text(worker.lastSeen,
+                  style: theme.textTheme.bodySmall
+                      ?.copyWith(color: Colors.grey, fontSize: subTitleFont)),
             ],
           ),
         ),
@@ -174,8 +254,9 @@ class WorkerCard extends StatelessWidget {
 class StatusBadge extends StatelessWidget {
   final String label;
   final Color color;
+  final double fontSize;
 
-  const StatusBadge({required this.label, required this.color});
+  const StatusBadge({super.key, required this.label, required this.color, required this.fontSize});
 
   @override
   Widget build(BuildContext context) {
@@ -185,7 +266,8 @@ class StatusBadge extends StatelessWidget {
         color: color.withOpacity(0.15),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Text(label, style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w500)),
+      child: Text(label,
+          style: TextStyle(color: color, fontSize: fontSize, fontWeight: FontWeight.w500)),
     );
   }
 }
