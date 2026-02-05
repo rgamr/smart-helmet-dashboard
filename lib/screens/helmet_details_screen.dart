@@ -6,7 +6,7 @@ class HelmetDetailsScreen extends StatelessWidget {
 
   const HelmetDetailsScreen({super.key, required this.helmet});
 
-  Color _statusColor(String status) {
+  Color _statusColor(String? status) {
     switch (status) {
       case 'Active':
         return Colors.green;
@@ -20,6 +20,11 @@ class HelmetDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    final isSmall = screenWidth < 600;
+    final padding = isSmall ? 12.0 : 16.0;
+    final iconSize = isSmall ? 28.0 : 36.0;
 
     return Scaffold(
       appBar: AppBar(
@@ -30,45 +35,48 @@ class HelmetDetailsScreen extends StatelessWidget {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(padding),
           child: Column(
             children: [
-              // Header card
               Card(
                 elevation: 4,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.all(padding),
                   child: Row(
                     children: [
                       CircleAvatar(
-                        radius: 36,
+                        radius: iconSize,
                         backgroundColor:
-                        _statusColor(helmet.status).withOpacity(0.15),
+                        _statusColor(helmet.status)
+                            .withOpacity(0.15),
                         child: Icon(
                           Icons.engineering,
-                          size: 36,
+                          size: iconSize,
                           color: _statusColor(helmet.status),
                         ),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment:
+                          CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "Helmet ID: ${helmet.id}",
+                              helmet.id.isNotEmpty
+                                  ? "Helmet ID: ${helmet.id}"
+                                  : "Helmet ID: Unknown",
                               style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 4),
                             Text(
                               "Assigned to: ${helmet.workerName ?? 'Unassigned'}",
-                              style: const TextStyle(color: Colors.grey),
+                              style: const TextStyle(
+                                  color: Colors.grey),
                             ),
                           ],
                         ),
@@ -80,24 +88,25 @@ class HelmetDetailsScreen extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              // Info cards
-              Row(
+              Wrap(
+                spacing: 12,
+                runSpacing: 12,
                 children: [
                   _InfoCard(
                     label: "Status",
                     value: helmet.status,
                     color: _statusColor(helmet.status),
                   ),
-                  const SizedBox(width: 12),
                   _InfoCard(
                     label: "Battery",
-                    value: "${helmet.battery}%",
+                    value: "${helmet.battery ?? 0}%",
                     color: Colors.blue,
                   ),
-                  const SizedBox(width: 12),
                   _InfoCard(
                     label: "Last Sync",
-                    value: helmet.lastUpdate,
+                    value: helmet.lastUpdate.isNotEmpty
+                        ? helmet.lastUpdate
+                        : '--',
                     color: Colors.grey.shade700,
                   ),
                 ],
@@ -105,14 +114,13 @@ class HelmetDetailsScreen extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              // Extra info
               Card(
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16)),
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: const [
+                  padding: EdgeInsets.all(padding),
+                  child: const Column(
+                    children: [
                       _DetailRow("Location", "Factory Zone A"),
                       Divider(),
                       _DetailRow("Temperature", "36°C"),
@@ -143,9 +151,11 @@ class _InfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
+    return SizedBox(
+      width: 160,
       child: Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape:
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         elevation: 4,
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -156,7 +166,7 @@ class _InfoCard extends StatelessWidget {
                       color: Colors.grey.shade600, fontSize: 12)),
               const SizedBox(height: 6),
               Text(
-                value,
+                value.isNotEmpty ? value : 'N/A',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                     fontSize: 16,

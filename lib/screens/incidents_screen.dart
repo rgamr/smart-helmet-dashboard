@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/incident_model.dart';
 
 class IncidentsScreen extends StatefulWidget {
-  final String? workerName; // optional filter
+  final String? workerName;
 
   const IncidentsScreen({super.key, this.workerName});
 
@@ -40,9 +40,16 @@ class _IncidentsScreenState extends State<IncidentsScreen> {
     ),
   ];
 
+  static const allowedStatuses = ['Open', 'In Progress', 'Resolved'];
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    final bool isSmallScreen = screenWidth < 500;
+    final double padding = isSmallScreen ? 12 : 16;
+    final double chipSpacing = isSmallScreen ? 6 : 8;
 
     final filteredIncidents = incidents.where((incident) {
       final matchesWorker =
@@ -67,12 +74,13 @@ class _IncidentsScreenState extends State<IncidentsScreen> {
         foregroundColor: Colors.white,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(padding),
         child: Column(
           children: [
             // Filters
             Wrap(
-              spacing: 8,
+              spacing: chipSpacing,
+              runSpacing: chipSpacing,
               children: ['All', 'Open', 'In Progress', 'Resolved']
                   .map(
                     (filter) => ChoiceChip(
@@ -86,7 +94,7 @@ class _IncidentsScreenState extends State<IncidentsScreen> {
                   .toList(),
             ),
 
-            const SizedBox(height: 16),
+            SizedBox(height: padding),
 
             // List
             Expanded(
@@ -100,10 +108,11 @@ class _IncidentsScreenState extends State<IncidentsScreen> {
                   : ListView.separated(
                 itemCount: filteredIncidents.length,
                 separatorBuilder: (_, __) =>
-                const SizedBox(height: 12),
+                    SizedBox(height: padding),
                 itemBuilder: (context, index) {
                   return _IncidentCard(
                     incident: filteredIncidents[index],
+                    isSmallScreen: isSmallScreen,
                   );
                 },
               ),
@@ -117,8 +126,12 @@ class _IncidentsScreenState extends State<IncidentsScreen> {
 
 class _IncidentCard extends StatelessWidget {
   final Incident incident;
+  final bool isSmallScreen;
 
-  const _IncidentCard({required this.incident});
+  const _IncidentCard({
+    required this.incident,
+    required this.isSmallScreen,
+  });
 
   Color _statusColor(String status) {
     switch (status) {
@@ -133,6 +146,13 @@ class _IncidentCard extends StatelessWidget {
     }
   }
 
+  String _safeText(String? value, String fallback) {
+    if (value == null || value.trim().isEmpty) {
+      return fallback;
+    }
+    return value;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -141,18 +161,20 @@ class _IncidentCard extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       elevation: 3,
       child: Padding(
-        padding: const EdgeInsets.all(14),
+        padding: EdgeInsets.all(isSmallScreen ? 12 : 14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              incident.title,
-              style: theme.textTheme.titleMedium
-                  ?.copyWith(fontWeight: FontWeight.w600),
+              _safeText(incident.title, 'Untitled incident'),
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                fontSize: isSmallScreen ? 14 : 16,
+              ),
             ),
             const SizedBox(height: 6),
             Text(
-              "Worker: ${incident.workerName}",
+              "Worker: ${_safeText(incident.workerName, 'Unknown')}",
               style: theme.textTheme.bodySmall
                   ?.copyWith(color: Colors.grey),
             ),
@@ -161,11 +183,11 @@ class _IncidentCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 _StatusBadge(
-                  label: incident.status,
+                  label: _safeText(incident.status, 'Unknown'),
                   color: _statusColor(incident.status),
                 ),
                 Text(
-                  incident.time,
+                  _safeText(incident.time, '--'),
                   style: theme.textTheme.bodySmall
                       ?.copyWith(color: Colors.grey),
                 ),

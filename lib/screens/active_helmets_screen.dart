@@ -29,7 +29,7 @@ class ActiveHelmetsScreen extends StatelessWidget {
     ),
   ];
 
-  Color _statusColor(String status) {
+  Color _statusColor(String? status) {
     switch (status) {
       case 'Active':
         return Colors.green;
@@ -40,21 +40,36 @@ class ActiveHelmetsScreen extends StatelessWidget {
     }
   }
 
-  Color _batteryColor(int battery) {
-    if (battery > 20) return Colors.green;
-    return Colors.red;
+  Color _batteryColor(int? battery) {
+    if (battery == null) return Colors.grey;
+    if (battery <= 20) return Colors.red;
+    return Colors.green;
   }
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    final isSmall = screenWidth < 600;
+    final padding = isSmall ? 12.0 : 16.0;
+    final iconSize = isSmall ? 20.0 : 24.0;
+    final titleSize = isSmall ? 14.0 : 16.0;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Active Helmets')),
-      body: ListView.separated(
-        padding: const EdgeInsets.all(16),
+      body: helmets.isEmpty
+          ? const Center(child: Text('No helmets available'))
+          : ListView.separated(
+        padding: EdgeInsets.all(padding),
         itemCount: helmets.length,
         separatorBuilder: (_, __) => const SizedBox(height: 12),
         itemBuilder: (context, index) {
           final helmet = helmets[index];
+
+          final workerName =
+          helmet.workerName?.isNotEmpty == true
+              ? helmet.workerName!
+              : 'Unassigned';
 
           return InkWell(
             borderRadius: BorderRadius.circular(14),
@@ -62,7 +77,8 @@ class ActiveHelmetsScreen extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => HelmetDetailsScreen(helmet: helmet),
+                  builder: (_) =>
+                      HelmetDetailsScreen(helmet: helmet),
                 ),
               );
             },
@@ -71,14 +87,15 @@ class ActiveHelmetsScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Padding(
-                padding: const EdgeInsets.all(14),
+                padding: EdgeInsets.all(padding),
                 child: Row(
                   children: [
                     CircleAvatar(
-                      backgroundColor:
-                      _statusColor(helmet.status).withOpacity(0.15),
+                      backgroundColor: _statusColor(helmet.status)
+                          .withOpacity(0.15),
                       child: Icon(
                         Icons.security,
+                        size: iconSize,
                         color: _statusColor(helmet.status),
                       ),
                     ),
@@ -89,25 +106,33 @@ class ActiveHelmetsScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            helmet.id,
-                            style: const TextStyle(
-                                fontWeight: FontWeight.w600),
+                            helmet.id.isNotEmpty
+                                ? helmet.id
+                                : 'Unknown ID',
+                            style: TextStyle(
+                              fontSize: titleSize,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                           Text(
-                            helmet.workerName ?? 'Unassigned',
+                            workerName,
                             style: const TextStyle(color: Colors.grey),
                           ),
                           const SizedBox(height: 6),
-                          Row(
+                          Wrap(
+                            spacing: 6,
+                            runSpacing: 4,
                             children: [
                               _Badge(
                                 label: helmet.status,
-                                color: _statusColor(helmet.status),
+                                color:
+                                _statusColor(helmet.status),
                               ),
-                              const SizedBox(width: 6),
                               _Badge(
-                                label: 'Battery ${helmet.battery}%',
-                                color: _batteryColor(helmet.battery),
+                                label:
+                                'Battery ${helmet.battery ?? 0}%',
+                                color:
+                                _batteryColor(helmet.battery),
                               ),
                             ],
                           ),
@@ -116,8 +141,11 @@ class ActiveHelmetsScreen extends StatelessWidget {
                     ),
 
                     Text(
-                      helmet.lastUpdate,
-                      style: const TextStyle(color: Colors.grey),
+                      helmet.lastUpdate.isNotEmpty
+                          ? helmet.lastUpdate
+                          : '--',
+                      style:
+                      const TextStyle(color: Colors.grey),
                     ),
                   ],
                 ),
@@ -139,13 +167,14 @@ class _Badge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding:
+      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: color.withOpacity(0.15),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
-        label,
+        label.isNotEmpty ? label : 'N/A',
         style: TextStyle(color: color, fontSize: 12),
       ),
     );
