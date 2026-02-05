@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:smart_helmet_app/models/helmet_model.dart';
 import '../models/worker_model.dart';
+import '../models/helmet_model.dart';
 import 'incidents_screen.dart';
 import 'helmet_details_screen.dart';
 
@@ -9,64 +9,102 @@ class WorkerDetailsScreen extends StatelessWidget {
 
   const WorkerDetailsScreen({super.key, required this.worker});
 
-  // ===== Helpers =====
-  Color _statusColor(String status) {
-    switch (status) {
-      case 'Online':
+  // ================= Validation Helpers =================
+
+  String _safeText(String? value, {String fallback = 'Unknown'}) {
+    if (value == null || value.trim().isEmpty) return fallback;
+    return value;
+  }
+
+  Color _statusColor(String? status) {
+    switch (status?.toLowerCase()) {
+      case 'online':
         return Colors.green;
-      case 'Incident':
+      case 'incident':
         return Colors.red;
       default:
         return Colors.grey;
     }
   }
 
-  Color _helmetColor(String helmet) {
-    return helmet == 'Connected' ? Colors.green : Colors.orange;
+  Color _helmetColor(String? helmet) {
+    if (helmet?.toLowerCase() == 'connected') return Colors.green;
+    return Colors.orange;
   }
+
+  bool get _hasHelmet => worker.helmet.toLowerCase() == 'connected';
+
+  // ================= UI =================
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final width = MediaQuery.of(context).size.width;
+
+    final padding = width < 500 ? 12.0 : 16.0;
+    final avatarRadius = width < 500 ? 30.0 : 36.0;
+    final titleSize = width < 500 ? 16.0 : 18.0;
+    final valueSize = width < 500 ? 14.0 : 16.0;
+
+    final name = _safeText(worker.name, fallback: 'Unknown Worker');
+    final id = _safeText(worker.id);
+    final status = _safeText(worker.status);
+    final helmet = _safeText(worker.helmet, fallback: 'Not Connected');
+    final lastSeen = _safeText(worker.lastSeen);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(worker.name),
+        title: Text(name),
         centerTitle: true,
         backgroundColor: theme.colorScheme.primary,
         foregroundColor: Colors.white,
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(padding),
           child: Column(
             children: [
-              // ===== Profile =====
+              // ================= Profile =================
               Card(
                 elevation: 4,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.all(padding),
                   child: Row(
                     children: [
                       CircleAvatar(
-                        radius: 36,
-                        backgroundColor: _statusColor(worker.status).withOpacity(0.15),
-                        child: Icon(Icons.person, size: 36, color: _statusColor(worker.status)),
+                        radius: avatarRadius,
+                        backgroundColor:
+                        _statusColor(status).withOpacity(0.15),
+                        child: Icon(
+                          Icons.person,
+                          size: avatarRadius,
+                          color: _statusColor(status),
+                        ),
                       ),
-                      const SizedBox(width: 16),
+                      const SizedBox(width: 12),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(worker.name,
-                                style: const TextStyle(
-                                    fontSize: 18, fontWeight: FontWeight.bold)),
+                            Text(
+                              name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: titleSize,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                             const SizedBox(height: 4),
-                            Text(worker.id,
-                                style: const TextStyle(fontSize: 14, color: Colors.grey)),
+                            Text(
+                              id,
+                              style: const TextStyle(
+                                color: Colors.grey,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -75,16 +113,17 @@ class WorkerDetailsScreen extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
 
-              // ===== Status Cards =====
+              // ================= Status Cards =================
               Row(
                 children: [
                   Expanded(
                     child: _InfoCard(
                       label: "Status",
-                      value: worker.status,
-                      color: _statusColor(worker.status),
+                      value: status,
+                      color: _statusColor(status),
+                      valueSize: valueSize,
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -92,16 +131,16 @@ class WorkerDetailsScreen extends StatelessWidget {
                     child: InkWell(
                       borderRadius: BorderRadius.circular(16),
                       onTap: () {
-                        if (worker.helmet == 'Connected') {
+                        if (_hasHelmet) {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (_) => HelmetDetailsScreen(
-                                helmet: Helmet (
+                                helmet: Helmet(
                                   id: 'H-204',
-                                  status: worker.helmet,
-                                  battery: 82 ,
-                                  workerName: worker.name,
+                                  status: helmet,
+                                  battery: 82,
+                                  workerName: name,
                                   lastUpdate: '2 min ago',
                                 ),
                               ),
@@ -110,34 +149,37 @@ class WorkerDetailsScreen extends StatelessWidget {
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text('No helmet connected to this worker'),
-                              duration: Duration(seconds: 2),
+                              content:
+                              Text('No helmet connected to this worker'),
                             ),
                           );
                         }
                       },
                       child: _InfoCard(
                         label: "Helmet",
-                        value: worker.helmet,
-                        color: _helmetColor(worker.helmet),
+                        value: helmet,
+                        color: _helmetColor(helmet),
+                        valueSize: valueSize,
                       ),
                     ),
                   ),
                 ],
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
 
-              // ===== Extra Details =====
+              // ================= Extra Details =================
               Card(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.all(padding),
                   child: Column(
                     children: [
-                      _DetailRow("Last Seen", worker.lastSeen),
+                      _DetailRow("Last Seen", lastSeen),
                       const Divider(),
-                      const _DetailRow("Battery Level", "82%"), // replace with dynamic later
+                      const _DetailRow("Battery Level", "82%"),
                       const Divider(),
                       const _DetailRow("Location", "Factory Zone A"),
                     ],
@@ -147,15 +189,12 @@ class WorkerDetailsScreen extends StatelessWidget {
 
               const Spacer(),
 
-              // ===== Actions =====
+              // ================= Actions =================
               Row(
                 children: [
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: () {},
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: theme.colorScheme.primary,
-                      ),
                       icon: const Icon(Icons.call),
                       label: const Text("Call"),
                     ),
@@ -167,14 +206,11 @@ class WorkerDetailsScreen extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => IncidentsScreen(workerName: worker.name),
+                            builder: (_) =>
+                                IncidentsScreen(workerName: name),
                           ),
                         );
                       },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: theme.colorScheme.primary,
-                        foregroundColor: Colors.white,
-                      ),
                       icon: const Icon(Icons.warning),
                       label: const Text("View Incidents"),
                     ),
@@ -190,12 +226,19 @@ class WorkerDetailsScreen extends StatelessWidget {
 }
 
 // ================= Info Card =================
+
 class _InfoCard extends StatelessWidget {
   final String label;
   final String value;
   final Color color;
+  final double valueSize;
 
-  const _InfoCard({required this.label, required this.value, required this.color});
+  const _InfoCard({
+    required this.label,
+    required this.value,
+    required this.color,
+    required this.valueSize,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -203,17 +246,26 @@ class _InfoCard extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       elevation: 4,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(14),
         child: Column(
           children: [
-            Text(label,
-                style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+            Text(
+              label,
+              style: TextStyle(
+                color: Colors.grey.shade600,
+                fontSize: 12,
+              ),
+            ),
             const SizedBox(height: 6),
             Text(
               value,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: color),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: valueSize,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
             ),
           ],
         ),
@@ -223,6 +275,7 @@ class _InfoCard extends StatelessWidget {
 }
 
 // ================= Detail Row =================
+
 class _DetailRow extends StatelessWidget {
   final String label;
   final String value;
@@ -237,7 +290,15 @@ class _DetailRow extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label, style: const TextStyle(color: Colors.grey)),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
+          Flexible(
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ),
         ],
       ),
     );
