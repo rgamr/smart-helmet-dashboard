@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "298905967790",
+    "firebase_url": "https://smart-helmet-fb2cf-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "smart-helmet-fb2cf",
+    "storage_bucket": "smart-helmet-fb2cf.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:298905967790:android:0a17e3e8a7a10f88d8e13f",
+        "android_client_info": {
+          "package_name": "com.example.smart_helmet_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDPSER5P4IJLV8zewCibG3IOU-__-HCYdk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:298905967790:android:6ba82b21ec21c01cd8e13f",
+        "android_client_info": {
+          "package_name": "com.example.smart_helmet_app_new"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDPSER5P4IJLV8zewCibG3IOU-__-HCYdk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
