@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../providers/dashboard_provider.dart';
 import '../models/worker_model.dart';
 import 'worker_details_screen.dart';
@@ -12,16 +13,24 @@ class WorkersScreen extends StatefulWidget {
 }
 
 class _WorkersScreenState extends State<WorkersScreen> {
-  String selectedFilter = 'All';
+  String selectedFilterKey = 'all';
   String searchQuery = '';
 
   @override
   Widget build(BuildContext context) {
+    final filterKeys = ['all', 'online', 'offline', 'incident'];
+    final filterLabels = {
+      'all': 'workers.filter_all'.tr(),
+      'online': 'workers.filter_online'.tr(),
+      'offline': 'workers.filter_offline'.tr(),
+      'incident': 'workers.filter_incident'.tr(),
+    };
+
     return Consumer<DashboardProvider>(
       builder: (context, dashboard, _) {
         final filteredWorkers = dashboard.workers.where((w) {
-          final matchesStatus =
-              selectedFilter == 'All' || w.status == selectedFilter;
+          final matchesStatus = selectedFilterKey == 'all' ||
+              w.status.toLowerCase() == selectedFilterKey;
           final matchesSearch = searchQuery.isEmpty ||
               w.name.toLowerCase().contains(searchQuery.toLowerCase()) ||
               w.id.toLowerCase().contains(searchQuery.toLowerCase());
@@ -29,7 +38,7 @@ class _WorkersScreenState extends State<WorkersScreen> {
         }).toList();
 
         return Scaffold(
-          appBar: AppBar(title: const Text('Workers')),
+          appBar: AppBar(title: Text('workers.title'.tr())),
           body: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -38,7 +47,7 @@ class _WorkersScreenState extends State<WorkersScreen> {
                 TextField(
                   onChanged: (value) => setState(() => searchQuery = value),
                   decoration: InputDecoration(
-                    hintText: 'Search worker...',
+                    hintText: 'workers.search_hint'.tr(),
                     prefixIcon: const Icon(Icons.search),
                     filled: true,
                     fillColor: Colors.grey.shade100,
@@ -58,12 +67,12 @@ class _WorkersScreenState extends State<WorkersScreen> {
                 // Filters
                 Wrap(
                   spacing: 8,
-                  children: ['All', 'Online', 'Offline', 'Incident']
-                      .map((filter) => ChoiceChip(
-                    label: Text(filter),
-                    selected: selectedFilter == filter,
+                  children: filterKeys
+                      .map((key) => ChoiceChip(
+                    label: Text(filterLabels[key]!),
+                    selected: selectedFilterKey == key,
                     onSelected: (_) =>
-                        setState(() => selectedFilter = filter),
+                        setState(() => selectedFilterKey = key),
                   ))
                       .toList(),
                 ),
@@ -75,7 +84,7 @@ class _WorkersScreenState extends State<WorkersScreen> {
                       ? const Center(child: CircularProgressIndicator())
                       : dashboard.hasError
                       ? Center(
-                    child: Text('Error loading workers'),
+                    child: Text('workers.error_loading'.tr()),
                   )
                       : ListView.separated(
                     itemCount: filteredWorkers.length,
@@ -166,8 +175,8 @@ class WorkerCard extends StatelessWidget {
                         const SizedBox(width: 6),
                         StatusBadge(
                           label: worker.helmet.toLowerCase() == 'connected'
-                              ? 'Helmet ${worker.helmetBattery ?? 0}%'
-                              : 'Helmet ${worker.helmet}',
+                              ? '${'workers.helmet_label'.tr()} ${worker.helmetBattery ?? 0}%'
+                              : '${'workers.helmet_label'.tr()} ${worker.helmet}',
                           color: _helmetColor(worker.helmet),
                         ),
                       ],

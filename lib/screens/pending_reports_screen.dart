@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class PendingReportsScreen extends StatelessWidget {
   const PendingReportsScreen({super.key});
@@ -6,29 +7,30 @@ class PendingReportsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pendingReports = [
-      {"title": "Incident Follow-up Report", "priority": "High"},
-      {"title": "Helmet H-121 Failure Analysis", "priority": "Medium"},
-      {"title": "Unauthorized Zone Entry Report", "priority": "High"},
+      {"titleKey": "pending_reports.incident_followup", "priorityKey": "pending_reports.priority_high"},
+      {"titleKey": "pending_reports.helmet_failure", "priorityKey": "pending_reports.priority_medium"},
+      {"titleKey": "pending_reports.unauthorized_zone", "priorityKey": "pending_reports.priority_high"},
     ];
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Pending Reports")),
+      appBar: AppBar(title: Text('pending_reports.title'.tr())),
       body: ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: pendingReports.length,
         itemBuilder: (context, index) {
           final report = pendingReports[index];
+          final priorityKey = report["priorityKey"]!;
 
           Color priorityColor =
-          report["priority"] == "High" ? Colors.red : Colors.orange;
+          priorityKey == "pending_reports.priority_high" ? Colors.red : Colors.orange;
 
           return Card(
             margin: const EdgeInsets.only(bottom: 12),
             child: ListTile(
               leading: const Icon(Icons.report, color: Colors.orange),
-              title: Text(report["title"]!),
+              title: Text(report["titleKey"]!.tr()),
               trailing: Text(
-                report["priority"]!,
+                priorityKey.tr(),
                 style: TextStyle(
                     color: priorityColor, fontWeight: FontWeight.bold),
               ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../providers/dashboard_provider.dart';
 import '../models/incident_model.dart';
 
@@ -23,6 +24,14 @@ class IncidentsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final filterKeys = ['All', 'Open', 'In Progress', 'Resolved'];
+    final filterLabels = {
+      'All': 'incidents.filter_all'.tr(),
+      'Open': 'incidents.filter_open'.tr(),
+      'In Progress': 'incidents.filter_in_progress'.tr(),
+      'Resolved': 'incidents.filter_resolved'.tr(),
+    };
+
     return Consumer<DashboardProvider>(
       builder: (context, dashboard, _) {
         final allIncidents = dashboard.incidents;
@@ -38,8 +47,8 @@ class IncidentsScreen extends StatelessWidget {
         return Scaffold(
           appBar: AppBar(
             title: Text(workerName != null
-                ? "$workerName - Incidents"
-                : "Incidents"),
+                ? 'incidents.title_for_worker'.tr(namedArgs: {'name': workerName!})
+                : 'incidents.title'.tr()),
           ),
           body: Padding(
             padding: const EdgeInsets.all(12),
@@ -48,13 +57,13 @@ class IncidentsScreen extends StatelessWidget {
                 // Filters
                 Wrap(
                   spacing: 8,
-                  children: ['All', 'Open', 'In Progress', 'Resolved']
-                      .map((filter) => ChoiceChip(
-                    label: Text(filter),
+                  children: filterKeys
+                      .map((key) => ChoiceChip(
+                    label: Text(filterLabels[key]!),
                     selected:
-                    dashboard.selectedIncidentFilter == filter,
+                    dashboard.selectedIncidentFilter == key,
                     onSelected: (_) =>
-                        dashboard.setIncidentFilter(filter),
+                        dashboard.setIncidentFilter(key),
                   ))
                       .toList(),
                 ),
@@ -63,9 +72,9 @@ class IncidentsScreen extends StatelessWidget {
                   child: dashboard.isLoading
                       ? const Center(child: CircularProgressIndicator())
                       : dashboard.hasError
-                      ? const Center(child: Text("Failed to load incidents"))
+                      ? Center(child: Text('incidents.failed_to_load'.tr()))
                       : filtered.isEmpty
-                      ? const Center(child: Text("No incidents found"))
+                      ? Center(child: Text('incidents.no_incidents'.tr()))
                       : ListView.separated(
                     itemCount: filtered.length,
                     separatorBuilder: (_, __) =>
@@ -108,7 +117,8 @@ class _IncidentCard extends StatelessWidget {
             Text(incident.title,
                 style: const TextStyle(fontWeight: FontWeight.w600)),
             const SizedBox(height: 4),
-            Text("Worker: ${incident.workerName}",
+            Text(
+                'incidents.worker_label'.tr(namedArgs: {'name': incident.workerName}),
                 style: const TextStyle(color: Colors.grey)),
             const SizedBox(height: 4),
             Row(

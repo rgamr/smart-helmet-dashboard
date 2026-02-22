@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../models/dashboard_card_model.dart';
 import '../screens/workers_screen.dart';
@@ -14,39 +15,39 @@ import '../providers/dashboard_provider.dart';
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
-  void _navigateCard(BuildContext context, String title) {
-    switch (title) {
-      case "Workers":
+  void _navigateCard(BuildContext context, String routeKey) {
+    switch (routeKey) {
+      case "workers":
         Navigator.push(
             context, MaterialPageRoute(builder: (_) => const WorkersScreen()));
         break;
 
-      case "Active Helmets":
+      case "active_helmets":
         Navigator.push(context,
             MaterialPageRoute(builder: (_) => const ActiveHelmetsScreen()));
         break;
 
-      case "Incidents":
+      case "incidents":
         Navigator.push(context,
             MaterialPageRoute(builder: (_) => const IncidentsScreen()));
         break;
 
-      case "Tasks Today":
+      case "tasks_today":
         Navigator.push(
             context, MaterialPageRoute(builder: (_) => const TasksScreen()));
         break;
 
-      case "Reports":
+      case "reports":
         Navigator.push(
             context, MaterialPageRoute(builder: (_) => const ReportsScreen()));
         break;
 
-      case "Pending Reports":
+      case "pending_reports":
         Navigator.push(context,
             MaterialPageRoute(builder: (_) => const PendingReportsScreen()));
         break;
 
-      case "Settings":
+      case "settings":
         Navigator.push(
             context, MaterialPageRoute(builder: (_) => const SettingsScreen()));
         break;
@@ -106,14 +107,14 @@ class HomeScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        "Dashboard",
+                        'home.dashboard'.tr(),
                         style: theme.textTheme.headlineSmall?.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        "Welcome, Supervisor!",
+                        'home.welcome'.tr(),
                         style: theme.textTheme.titleMedium
                             ?.copyWith(color: Colors.white70),
                       ),
@@ -144,49 +145,49 @@ class HomeScreen extends StatelessWidget {
                   childAspectRatio: 1.2,
                   children: [
                     WorkersCard(
-                        onTap: () => _navigateCard(context, "Workers")),
+                        onTap: () => _navigateCard(context, "workers")),
 
                     ActiveHelmetsCard(
                         onTap: () =>
-                            _navigateCard(context, "Active Helmets")),
+                            _navigateCard(context, "active_helmets")),
 
                     IncidentsCard(
                         onTap: () =>
-                            _navigateCard(context, "Incidents")),
+                            _navigateCard(context, "incidents")),
 
                     DashboardCard(
-                      title: "Pending Reports",
-                      icon: Icons.report,
-                      color: Colors.orange,
-                      metric: "3 pending",
-                      onTap: () =>
-                          _navigateCard(context, "Pending Reports"),
-                    ),
-
-                    DashboardCard(
-                      title: "Tasks Today",
-                      icon: Icons.task,
-                      color: Colors.blue,
-                      metric: "7 tasks",
-                      onTap: () =>
-                          _navigateCard(context, "Tasks Today"),
-                    ),
-
-                    DashboardCard(
-                      title: "Reports",
+                      title: 'home.reports'.tr(),
                       icon: Icons.bar_chart,
                       color: Colors.orange,
-                      metric: "5 reports",
+                      metric: 'home.reports_count'.tr(),
                       onTap: () =>
-                          _navigateCard(context, "Reports"),
+                          _navigateCard(context, "reports"),
                     ),
 
                     DashboardCard(
-                      title: "Settings",
+                      title: 'home.pending_reports'.tr(),
+                      icon: Icons.report,
+                      color: Colors.orange,
+                      metric: 'home.pending_count'.tr(),
+                      onTap: () =>
+                          _navigateCard(context, "pending_reports"),
+                    ),
+
+                    DashboardCard(
+                      title: 'home.tasks_today'.tr(),
+                      icon: Icons.task,
+                      color: Colors.blue,
+                      metric: 'home.tasks_count'.tr(),
+                      onTap: () =>
+                          _navigateCard(context, "tasks_today"),
+                    ),
+
+                    DashboardCard(
+                      title: 'home.settings'.tr(),
                       icon: Icons.settings,
                       color: Colors.grey,
                       onTap: () =>
-                          _navigateCard(context, "Settings"),
+                          _navigateCard(context, "settings"),
                     ),
                   ],
                 ),
@@ -216,10 +217,10 @@ class WorkersCard extends StatelessWidget {
             .length;
 
         return DashboardCard(
-          title: "Workers",
+          title: 'home.workers'.tr(),
           icon: Icons.people,
           color: Colors.blue,
-          metric: "$onlineWorkers online",
+          metric: '$onlineWorkers ${'home.online'.tr()}',
           onTap: onTap,
         );
       },
@@ -240,10 +241,10 @@ class ActiveHelmetsCard extends StatelessWidget {
             .length;
 
         return DashboardCard(
-          title: "Active Helmets",
+          title: 'home.active_helmets'.tr(),
           icon: Icons.engineering,
           color: Colors.teal,
-          metric: "$activeHelmets active",
+          metric: '$activeHelmets ${'home.active'.tr()}',
           onTap: onTap,
         );
       },
@@ -264,10 +265,10 @@ class IncidentsCard extends StatelessWidget {
             .length;
 
         return DashboardCard(
-          title: "Incidents",
+          title: 'home.incidents'.tr(),
           icon: Icons.warning,
           color: Colors.red,
-          metric: "$openIncidents open",
+          metric: '$openIncidents ${'home.open'.tr()}',
           onTap: onTap,
         );
       },

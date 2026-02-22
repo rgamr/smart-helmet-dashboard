@@ -5,6 +5,8 @@ class Helmet {
   final String? workerName;
   final String? lastUpdate;
   final String? location;
+  final double? helmetTemperature;
+  final double? ambientTemperature;
 
   Helmet({
     required this.id,
@@ -13,6 +15,8 @@ class Helmet {
     this.workerName,
     this.lastUpdate,
     this.location,
+    this.helmetTemperature,
+    this.ambientTemperature,
   });
 
   factory Helmet.fromJson(Map<String, dynamic> json) {
@@ -23,15 +27,8 @@ class Helmet {
       workerName: json['workerName'],
       lastUpdate: json['lastUpdate'],
       location: json['location'],
+      helmetTemperature: json['helmetTemperature']?.toDouble(),
+      ambientTemperature: json['ambientTemperature']?.toDouble(),
     );
   }
-
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'status': status,
-    'battery': battery,
-    'workerName': workerName,
-    'lastUpdate': lastUpdate,
-    'location': location,
-  };
 }

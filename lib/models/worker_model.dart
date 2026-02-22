@@ -6,6 +6,9 @@ class Worker {
   final String lastSeen;
   final int? helmetBattery;
   final String? location;
+  final int? heartRate;
+  final int? oxygenLevel;
+  final double? bodyTemperature;
 
   Worker({
     required this.name,
@@ -15,6 +18,9 @@ class Worker {
     required this.lastSeen,
     this.helmetBattery,
     this.location,
+    this.heartRate,
+    this.oxygenLevel,
+    this.bodyTemperature,
   });
 
   factory Worker.fromJson(Map<String, dynamic> json) {
@@ -26,16 +32,9 @@ class Worker {
       lastSeen: json['lastSeen'] ?? '',
       helmetBattery: json['helmetBattery'],
       location: json['location'],
+      heartRate: json['heartRate'],
+      oxygenLevel: json['oxygenLevel'],
+      bodyTemperature: json['bodyTemperature']?.toDouble(),
     );
   }
-
-  Map<String, dynamic> toJson() => {
-    'name': name,
-    'id': id,
-    'status': status,
-    'helmet': helmet,
-    'lastSeen': lastSeen,
-    'helmetBattery': helmetBattery,
-    'location': location,
-  };
 }

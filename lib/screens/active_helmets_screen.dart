@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../providers/dashboard_provider.dart';
 import '../models/helmet_model.dart';
 import 'helmet_details_screen.dart';
@@ -27,20 +28,20 @@ class ActiveHelmetsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Active Helmets')),
+      appBar: AppBar(title: Text('helmets.title'.tr())),
       body: Consumer<DashboardProvider>(
         builder: (context, dashboard, _) {
           if (dashboard.isLoading) {
             return const Center(child: CircularProgressIndicator());
           }
           if (dashboard.hasError) {
-            return const Center(child: Text('Failed to load helmets'));
+            return Center(child: Text('helmets.failed_to_load'.tr()));
           }
 
           final helmets = dashboard.helmets;
 
           if (helmets.isEmpty) {
-            return const Center(child: Text('No helmets available'));
+            return Center(child: Text('helmets.no_helmets'.tr()));
           }
 
           return ListView.separated(
@@ -88,7 +89,7 @@ class HelmetCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final workerName =
-    helmet.workerName?.isNotEmpty == true ? helmet.workerName! : 'Unassigned';
+    helmet.workerName?.isNotEmpty == true ? helmet.workerName! : 'helmets.unassigned'.tr();
 
     return InkWell(
       borderRadius: BorderRadius.circular(14),
@@ -109,7 +110,7 @@ class HelmetCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      helmet.id.isNotEmpty ? helmet.id : 'Unknown ID',
+                      helmet.id.isNotEmpty ? helmet.id : 'helmets.unknown_id'.tr(),
                       style: const TextStyle(
                           fontWeight: FontWeight.w600, fontSize: 16),
                     ),
@@ -121,7 +122,7 @@ class HelmetCard extends StatelessWidget {
                       children: [
                         _Badge(label: helmet.status, color: statusColor),
                         _Badge(
-                          label: 'Battery ${helmet.battery ?? 0}%',
+                          label: '${'helmets.battery'.tr()} ${helmet.battery ?? 0}%',
                           color: batteryColor,
                         ),
                       ],
@@ -156,7 +157,7 @@ class _Badge extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
-        label.isNotEmpty ? label : 'N/A',
+        label.isNotEmpty ? label : 'common.na'.tr(),
         style: TextStyle(color: color, fontSize: 12),
       ),
     );
