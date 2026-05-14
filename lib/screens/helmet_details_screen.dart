@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../models/helmet_model.dart';
 import '../services/weather_service.dart';
+import 'helmet_map_screen.dart';
 
 class HelmetDetailsScreen extends StatefulWidget {
   final Helmet helmet;
@@ -59,16 +60,7 @@ class _HelmetDetailsScreenState extends State<HelmetDetailsScreen> {
     return Colors.green;
   }
 
-  String _temperatureStatus(double? helmetTemp, double? compareTemp) {
-    if (helmetTemp == null || compareTemp == null || helmetTemp == 0) {
-      return 'common.na'.tr();
-    }
-    double diff = helmetTemp - compareTemp;
-    if (diff > 15) return '🔥 Overheating';
-    if (diff > 10) return '⚠️ Hot';
-    if (diff > 5) return '✅ Warm';
-    return '✅ Normal';
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -326,6 +318,21 @@ class _HelmetDetailsScreenState extends State<HelmetDetailsScreen> {
                           'helmet_details.location'.tr(),
                           widget.helmet.location ?? 'helmet_details.unknown'.tr()),
                     ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              // View on Map button
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  icon: const Icon(Icons.map),
+                  label: Text('helmet_details.view_on_map'.tr()),
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => HelmetMapScreen(helmet: widget.helmet),
+                    ),
                   ),
                 ),
               ),

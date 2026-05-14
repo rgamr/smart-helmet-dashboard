@@ -37,7 +37,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           email: _emailController.text.trim(),
         );
         setState(() => _emailSent = true);
-      } on FirebaseAuthException catch (e) {
+      } on FirebaseAuthException catch (_) {
         setState(() {
           _errorMessage = 'forgot_password.failed_to_send_reset'.tr();
         });
